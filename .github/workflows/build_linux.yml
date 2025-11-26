@@ -27,7 +27,7 @@ on:
 jobs:
   build_wheels:
     name: Build wheels and Upload (Linux x86_64, ${{ inputs.flash-attn-version }}, ${{ inputs.python-version }}, ${{ inputs.torch-version }}, ${{ inputs.cuda-version }})
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-20.04
     env:
       DEBIAN_FRONTEND: noninteractive
       TERM: xterm-256color
@@ -63,13 +63,14 @@ jobs:
 
       - name: Install build dependencies
         run: |
+          sudo apt update
           sudo apt install -y ninja-build clang
           pip install -U pip setuptools==75.8.0 wheel setuptools packaging psutil
 
       - name: Set environment variables
         run: |
-          export PATH=/usr/local/nvidia/bin:/usr/local/nvidia/lib64:$PATH
-          export LD_LIBRARY_PATH=/usr/local/nvidia/lib64:/usr/local/cuda/lib64:$LD_LIBRARY_PATH
+          echo "PATH=/usr/local/nvidia/bin:/usr/local/nvidia/lib64:$PATH" >> $GITHUB_ENV
+          echo "LD_LIBRARY_PATH=/usr/local/nvidia/lib64:/usr/local/cuda/lib64:$LD_LIBRARY_PATH" >> $GITHUB_ENV
 
       - name: Build wheels
         id: build_wheels
@@ -94,11 +95,9 @@ jobs:
           tag_name=${{ github.ref_name }}
           wheel_path="flash-attention/dist/${{ steps.build_wheels.outputs.WHEEL_NAME }}"
 
-          # Check if the file exists
           if [ ! -f "$wheel_path" ]; then
             echo "Error: Wheel file not found at $wheel_path"
             exit 1
           fi
 
-          # Upload the release asset using GitHub CLI
           gh release upload "$tag_name" "$wheel_path" --clobber
