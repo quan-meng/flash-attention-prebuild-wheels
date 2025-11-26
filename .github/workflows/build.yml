@@ -8,7 +8,7 @@ on:
 jobs:
   create_releases:
     name: Create Releases
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v4
       - name: Create Release
@@ -21,7 +21,7 @@ jobs:
 
   create_matrix:
     name: Create Matrix
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     outputs:
       matrix: ${{ steps.create_matrix.outputs.matrix }}
     steps:
@@ -126,7 +126,7 @@ jobs:
       - build_wheels_windows
       - build_wheels_windows_code_build
     if: always()
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v4
 
@@ -155,7 +155,7 @@ jobs:
     permissions:
       contents: write
     if: always()
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
