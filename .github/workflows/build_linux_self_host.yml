@@ -29,7 +29,7 @@ jobs:
     name: Build wheels and Upload (Linux x86_64, self-hosted runner, ${{ inputs.flash-attn-version }}, ${{ inputs.python-version }}, ${{ inputs.torch-version }}, ${{ inputs.cuda-version }})
     runs-on: self-hosted
     container:
-      image: ubuntu:22.04
+      image: ubuntu:20.04
     defaults:
       run:
         shell: bash
