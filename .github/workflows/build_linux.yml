@@ -5,6 +5,7 @@
 name: "[Linux x86_64] Build wheels and upload to GitHub Releases"
 
 on:
+  # Called from other workflows (e.g. build.yml)
   workflow_call:
     inputs:
       flash-attn-version:
@@ -21,6 +22,26 @@ on:
         type: string
       cuda-version:
         description: "CUDA version"
+        required: true
+        type: string
+
+  # Run manually from the Actions tab
+  workflow_dispatch:
+    inputs:
+      flash-attn-version:
+        description: "Flash-Attention version (tag or branch)"
+        required: true
+        type: string
+      python-version:
+        description: "Python version (e.g. 3.10, 3.11, 3.12)"
+        required: true
+        type: string
+      torch-version:
+        description: "PyTorch version (e.g. 2.2.0, 2.7.0)"
+        required: true
+        type: string
+      cuda-version:
+        description: "CUDA version (e.g. 12.1.0, 12.4.0)"
         required: true
         type: string
 
@@ -79,7 +100,11 @@ jobs:
           NVCC_THREADS: 2
         run: |
           chmod +x build_linux.sh
-          ./build_linux.sh ${{ inputs.flash-attn-version }} ${{ inputs.python-version }} ${{ inputs.torch-version }} ${{ inputs.cuda-version }}
+          ./build_linux.sh \
+            ${{ inputs.flash-attn-version }} \
+            ${{ inputs.python-version }} \
+            ${{ inputs.torch-version }} \
+            ${{ inputs.cuda-version }}
           wheel_name=$(basename $(ls flash-attention/dist/*.whl | head -n 1))
           echo "WHEEL_NAME=$wheel_name" >> $GITHUB_OUTPUT
 
