@@ -23,6 +23,24 @@ on:
         description: "CUDA version"
         required: true
         type: string
+  workflow_dispatch:
+    inputs:
+      flash-attn-version:
+        description: "Flash-Attention version"
+        required: true
+        type: string
+      python-version:
+        description: "Python version"
+        required: true
+        type: string
+      torch-version:
+        description: "PyTorch version"
+        required: true
+        type: string
+      cuda-version:
+        description: "CUDA version"
+        required: true
+        type: string
 
 jobs:
   build_wheels_self_hosted:
@@ -74,7 +92,7 @@ jobs:
       - name: Configure Git safe directory
         shell: bash
         run: |
-          git config --global --add safe.directory $(pwd)
+          git config --global --add safe.directory "$(pwd)"
 
       - uses: actions/setup-python@v5
         with:
@@ -97,8 +115,8 @@ jobs:
       - name: Set environment variables
         shell: bash
         run: |
-          export PATH=/usr/local/nvidia/bin:/usr/local/nvidia/lib64:$PATH
-          export LD_LIBRARY_PATH=/usr/local/nvidia/lib64:/usr/local/cuda/lib64:$LD_LIBRARY_PATH
+          echo "PATH=/usr/local/nvidia/bin:/usr/local/nvidia/lib64:$PATH" >> $GITHUB_ENV
+          echo "LD_LIBRARY_PATH=/usr/local/nvidia/lib64:/usr/local/cuda/lib64:$LD_LIBRARY_PATH" >> $GITHUB_ENV
 
       - name: Build wheels
         timeout-minutes: 2160
@@ -116,7 +134,7 @@ jobs:
       - name: Install Test
         shell: bash
         run: |
-          pip uninstall -y flash-attn > /dev/null 2>&1
+          pip uninstall -y flash-attn > /dev/null 2>&1 || true
           pip install --no-cache-dir flash-attention/dist/${{ steps.build_wheels.outputs.WHEEL_NAME }}
           python -c "import flash_attn; print(flash_attn.__version__)"
 
@@ -128,13 +146,11 @@ jobs:
           tag_name=${{ github.ref_name }}
           wheel_path="flash-attention/dist/${{ steps.build_wheels.outputs.WHEEL_NAME }}"
 
-          # Check if the file exists
           if [ ! -f "$wheel_path" ]; then
             echo "Error: Wheel file not found at $wheel_path"
             exit 1
           fi
 
-          # Upload the release asset using GitHub CLI
           gh release upload "$tag_name" "$wheel_path" --clobber
 
       - name: Clean up
